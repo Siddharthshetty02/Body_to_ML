@@ -13,10 +13,10 @@ An interactive, beginner-friendly educational suite tailored to explain core Mac
 | **1** | **👁️ Sensory Organs (Eyes)** | Raw environmental input capture (light, photons) | **Data Ingestion & Features (Tensors / Pixels)** | Computer Vision & Image Classification |
 | **2** | **🫁 Lungs & Respiration** | Atmospheric pressure intake & oxygen leveling | **Feature Scaling & Data Normalization** | Gradient Descent Stability & Neural Nets |
 | **3** | **🥣 Digestive Gut / Stomach** | Breaking food into nutrients & molecules | **Data Tokenization & Parsing** | Natural Language Processing (LLMs & Chatbots) |
-| **4** | **🫀 Liver & Metabolism** | Filtering toxins & preventing overload | **Dropout Regularization & Noise Filtering** | Overfitting Prevention |
-| **5** | **❤️ Cardiovascular Heart** | Rhythmic blood pump driving continuous flow | **Training Epochs & Learning Optimization** | Model Training Loops |
+| **4** | **🧪 Liver & Metabolism** | Filtering toxins & preventing overload | **Dropout Regularization & Noise Filtering** | Overfitting Prevention |
+| **5** | **🫀 Cardiovascular Heart** | Rhythmic blood pump driving continuous flow | **Training Epochs & Learning Optimization** | Model Training Loops |
 | **6** | **🧠 The Brain & Synapses** | Neural memory & associative decision making | **Neural Weights ($W$) & Inference Output** | Self-Driving Cars, Siri, Recommendations |
-| **7** | **🩺 Renal Kidneys** | Waste clearance & osmotic error measurement | **Loss Functions & Weight Pruning** | Model Compression for Mobile Devices |
+| **7** | **🫘 Renal Kidneys** | Waste clearance & osmotic error measurement | **Loss Functions & Weight Pruning** | Model Compression for Mobile Devices |
 
 ---
 
