@@ -2,7 +2,7 @@
 
 **BioML: Machine Learning Explained Through the Human Body**
 
-An interactive, beginner-friendly educational suite tailored for 10th-grade students to learn core Machine Learning concepts by mapping them to organs of the human body.
+An interactive, beginner-friendly educational suite tailored to explain core Machine Learning concepts in a simplified, intuitive way by mapping them to organs of the human body.
 
 ---
 
@@ -25,7 +25,7 @@ An interactive, beginner-friendly educational suite tailored for 10th-grade stud
 - **`index.html`**: Entry redirect to the main explorer.
 - **`bioml_interactive_anatomy_explorer.html`**: The interactive Body Scanner featuring a holographic body map, glowing organs, and live interactive simulations for each step.
 - **`story.html`**: A 7-step guided story tour explaining the AI pipeline step-by-step.
-- **`quiz.html`**: 10th-grade Pop Quiz Arena with instant feedback, live scoring, and celebration confetti.
+- **`quiz.html`**: Beginner Pop Quiz Arena with instant feedback, live scoring, and celebration confetti.
 - **`cheatsheet.html`**: Comprehensive reference table with instant search and 1-click Markdown copy.
 - **`gemini_generated_video_d21a6e5b.mp4`**: Demonstration walkthrough video.
 

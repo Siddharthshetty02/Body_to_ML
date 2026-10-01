@@ -157,7 +157,7 @@
                 class="text-cyan-400">2</span>ML</span>
             <span
               class="text-[10px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-700/80 px-2 py-0.2 rounded-full hidden sm:inline-flex items-center gap-1">
-              Grade 10
+              Simplified Edition
             </span>
           </div>
         </div>
@@ -220,7 +220,7 @@
       <div class="flex items-center gap-2">
         <span>💡</span>
         <span class="text-slate-200">
-          <strong class="text-cyan-300 font-semibold">10th-Grade Secret:</strong> AI didn't invent magic—it copied the
+          <strong class="text-cyan-300 font-semibold">Simplified Secret:</strong> AI didn't invent magic—it copied the
           human body! Tap any organ to see the code connection.
         </span>
       </div>
@@ -499,12 +499,12 @@
             </button>
           </div>
 
-          <!-- 10th-Grade High School Hook (Relatable Everyday Metaphor) -->
+          <!-- Simplified Everyday Analogy (Relatable Real-World Metaphor) -->
           <div
             class="my-2 p-2.5 rounded-xl bg-gradient-to-r from-biolab-850/90 to-biolab-800/50 border border-cyan-900/40 space-y-0.5 shadow-inner">
             <div class="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wide">
               <span>🍕</span>
-              <span>10th-Grade Everyday Analogy</span>
+              <span>Simplified Everyday Analogy</span>
             </div>
             <p id="metaphorText" class="text-xs text-slate-200 leading-relaxed font-normal">
               "Think of the brain as your memory when shooting free-throws in basketball. After shooting 500 balls, your
@@ -845,7 +845,7 @@ prune.l1_unstructured(model.synapses, name="weight", amount=0.20)`,
           <div class="space-y-1.5">
             <div class="flex items-center justify-between text-[11px]">
               <span class="text-slate-300">Mistakes on Homework (Loss Score):</span>
-              <span id="lossDisplay" class="font-mono text-emerald-400 font-bold">0.12 (Grade A+! AI is Smart!)</span>
+              <span id="lossDisplay" class="font-mono text-emerald-400 font-bold">0.12 (Score: A+ • Highly Accurate)</span>
             </div>
             <input type="range" min="0" max="100" value="12" id="kidneySlider" oninput="updateKidneyDemo(this.value)" class="w-full accent-amber-500 cursor-pointer">
             <div class="w-full bg-biolab-950 h-3 rounded-full overflow-hidden border border-biolab-800 p-0.5">
@@ -1077,17 +1077,17 @@ prune.l1_unstructured(model.synapses, name="weight", amount=0.20)`,
       const normalized = (loss / 100).toFixed(2);
       if (loss <= 20) {
         if (display) {
-          display.innerText = `${normalized} (Grade A+! AI is Smart!)`;
+          display.innerText = `${normalized} (Score: A+ • Highly Accurate)`;
           display.className = "font-mono text-emerald-400 font-bold";
         }
       } else if (loss <= 50) {
         if (display) {
-          display.innerText = `${normalized} (Grade B: Decent)`;
+          display.innerText = `${normalized} (Score: B • Decent Accuracy)`;
           display.className = "font-mono text-amber-400 font-bold";
         }
       } else {
         if (display) {
-          display.innerText = `${normalized} (Grade F: Mistake prone)`;
+          display.innerText = `${normalized} (Score: Needs Practice • High Error)`;
           display.className = "font-mono text-rose-400 font-bold";
         }
       }
