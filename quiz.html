@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BioML: High School Pop Quiz Arena | Grade 10 Edition</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            biolab: {
+              950: '#070b14',
+              900: '#0c1322',
+              850: '#111b2f',
+              800: '#16233e',
+              750: '#1a2b4c',
+              700: '#1f335b',
+              accent: '#38bdf8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #070b14; }
+    ::-webkit-scrollbar-thumb { background: #1f335b; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+    .glass-card {
+      background: rgba(12, 19, 34, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(31, 51, 91, 0.7);
+    }
+    .opt-correct {
+      background: rgba(6, 78, 59, 0.6) !important;
+      border-color: #10b981 !important;
+      color: #a7f3d0 !important;
+    }
+    .opt-wrong {
+      background: rgba(136, 19, 55, 0.6) !important;
+      border-color: #f43f5e !important;
+      color: #fecdd3 !important;
+    }
+  </style>
+</head>
+<body class="bg-biolab-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden flex flex-col justify-between">
+
+  <!-- ==================== UNIFIED MULTI-PAGE NAVIGATION ==================== -->
+  <header class="border-b border-biolab-800 bg-biolab-900/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <a href="bioml_interactive_anatomy_explorer.html" class="flex items-center space-x-2.5 group">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-rose-500 p-0.5 shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-biolab-950 rounded-[10px] flex items-center justify-center">
+            <span class="text-lg">🧬</span>
+          </div>
+        </div>
+        <div>
+          <span class="font-extrabold tracking-tight text-lg text-white">Body<span class="text-cyan-400">2</span>ML</span>
+        </div>
+      </a>
+
+      <!-- Multi-Page Links -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="bioml_interactive_anatomy_explorer.html" class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>🧬</span>
+          <span>Body Explorer</span>
+        </a>
+        <a href="story.html" class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>🎬</span>
+          <span class="hidden sm:inline">How AI Thinks</span>
+          <span class="sm:hidden">Story</span>
+        </a>
+        <a href="quiz.html" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-emerald-950 border border-emerald-500 text-emerald-300 shadow-sm flex items-center gap-1.5 transition">
+          <span>🏆</span>
+          <span>Pop Quiz</span>
+        </a>
+        <a href="cheatsheet.html" class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>📋</span>
+          <span class="hidden sm:inline">Cheat Sheet</span>
+          <span class="sm:hidden">Table</span>
+        </a>
+      </nav>
+
+      <!-- Score Badge -->
+      <div id="headerScore" class="px-3 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-600/80 text-emerald-300 text-xs font-mono font-bold">
+        Score: 0 / 5
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN QUIZ STAGE (ONE-SCROLL) ==================== -->
+  <main class="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex-1 flex flex-col justify-center space-y-4 w-full">
+
+    <!-- Top Card: Quiz Header & Live Progress -->
+    <div class="glass-card rounded-2xl p-4 shadow-md flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl p-2 rounded-xl bg-emerald-950 border border-emerald-700/60 shadow-inner">🏆</span>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-white">10th-Grade Body to AI Challenge</h1>
+          <p class="text-xs text-slate-400">Pick the right match! Instant explanations after every choice.</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <span class="text-[11px] font-mono text-slate-400 block">Question</span>
+        <span id="questionCounter" class="text-sm font-mono font-bold text-cyan-300">1 of 5</span>
+      </div>
+    </div>
+
+    <!-- Active Question Card -->
+    <div class="glass-card rounded-3xl p-5 sm:p-7 shadow-2xl relative overflow-hidden transition-all duration-300" id="quizCard">
+      
+      <!-- Question Prompt -->
+      <div class="mb-4 pb-3 border-b border-biolab-800">
+        <div class="flex items-center gap-2 mb-1">
+          <span id="qBadge" class="text-xs font-mono px-2 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold">
+            QUESTION 1
+          </span>
+          <span id="qCategory" class="text-xs text-slate-400 font-medium">Text & ChatGPT</span>
+        </div>
+        <h2 id="qText" class="text-base sm:text-lg font-bold text-white leading-snug">
+          When an AI like ChatGPT cuts a long sentence into bite-sized numbered word blocks (like chewing a sandwich), which organ is it copying?
+        </h2>
+      </div>
+
+      <!-- Multiple Choice Options -->
+      <div class="space-y-2.5" id="optionsContainer">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Feedback Box (Appears after answer) -->
+      <div id="feedbackBox" class="mt-4 p-3.5 rounded-xl border hidden transition-all">
+        <div class="flex items-center gap-2 text-xs font-bold mb-1" id="feedbackTitle">
+          <!-- Result Title -->
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed" id="feedbackExplain">
+          <!-- Explanation -->
+        </p>
+      </div>
+
+      <!-- Next Button (Appears after answer) -->
+      <div class="mt-5 flex justify-end">
+        <button id="nextBtn" onclick="nextQuestion()" class="hidden px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-bold text-xs transition shadow-md">
+          Next Question &rarr;
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Final Result Screen (Initially Hidden) -->
+    <div id="finalCard" class="hidden glass-card rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-2xl">
+      <div class="text-5xl animate-bounce">🎓</div>
+      <h2 class="text-xl sm:text-2xl font-extrabold text-white">Quiz Completed!</h2>
+      <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto" id="finalMessage">
+        You've mastered the link between human anatomy and artificial intelligence!
+      </p>
+      <div class="text-3xl font-mono font-bold text-cyan-300" id="finalScoreDisplay">
+        5 / 5 (100%)
+      </div>
+      <div class="pt-2 flex justify-center gap-3">
+        <button onclick="restartQuiz()" class="px-4 py-2 rounded-xl bg-biolab-850 hover:bg-biolab-800 border border-biolab-700 text-xs text-white transition">
+          🔄 Play Again
+        </button>
+        <a href="cheatsheet.html" class="px-4 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold text-xs transition shadow-md">
+          📋 View Cheat Sheet &rarr;
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-biolab-800/80 py-2.5 text-center text-xs text-slate-500 font-mono">
+    BioML Pop Quiz Challenge • Grade 10 Certified
+  </footer>
+
+  <!-- ==================== QUIZ SCRIPT ==================== -->
+  <script>
+    const quizQuestions = [
+      {
+        category: "ChatGPT & Text",
+        question: "When ChatGPT chops a whole sentence into tiny bite-sized word chunks (like chewing a sandwich), which organ is it copying?",
+        options: [
+          { text: "🫁 The Lungs (Filtering air)", correct: false },
+          { text: "🥣 The Stomach (Tokenization & Digestion)", correct: true },
+          { text: "❤️ The Heart (Pumping blood)", correct: false },
+          { text: "👁️ The Eyes (Optic lenses)", correct: false }
+        ],
+        explanation: "Correct! Just like your stomach digests a whole sandwich into tiny amino acids that cells can absorb, the AI tokenizer chops sentences into bite-sized 'tokens' with ID numbers!"
+      },
+      {
+        category: "Training & Practice",
+        question: "When a soccer player shoots practice shots over and over to build muscle memory with every whistle, what is the AI equivalent?",
+        options: [
+          { text: "❤️ Heartbeat & Training Loop (Epochs)", correct: true },
+          { text: "🩺 Kidneys filtering urea salts", correct: false },
+          { text: "👁️ Eyes absorbing photons", correct: false },
+          { text: "🧠 Brain forgetting old memories", correct: false }
+        ],
+        explanation: "Correct! In AI, every heartbeat corresponds to one 'Epoch' or training iteration. The heart pumps a batch of flashcards through the network to refine the dials!"
+      },
+      {
+        category: "Data Quality & Fairness",
+        question: "Why does an AI need the 'Lungs' (Feature Normalization)?",
+        options: [
+          { text: "To blow cool air onto the computer fan", correct: false },
+          { text: "To scale mixed numbers fairly (like 0% to 100%) so big numbers don't bully small ones", correct: true },
+          { text: "To delete the computer's hard drive automatically", correct: false },
+          { text: "To translate english into spanish", correct: false }
+        ],
+        explanation: "Correct! If one number is 15 (Age) and another is $100,000 (Income), the giant number overwhelms the model. The lungs scale everything fairly between 0.0 and 1.0!"
+      },
+      {
+        category: "Anti-Cheating & Generalization",
+        question: "Why does the 'Liver' randomly shut off some connections during training (Dropout)?",
+        options: [
+          { text: "To save electricity and turn off the monitor", correct: false },
+          { text: "To stop the AI from cheating by just memorizing the exam answers ('Overfitting')", correct: true },
+          { text: "Because the computer crashed", correct: false },
+          { text: "To make the AI give completely random answers", correct: false }
+        ],
+        explanation: "Correct! If an AI memorizes the training data, it fails on real-world questions. The liver forces it to learn real underlying concepts instead of memorizing!"
+      },
+      {
+        category: "Mistakes & Optimization",
+        question: "What do the 'Kidneys' do in Machine Learning?",
+        options: [
+          { text: "Calculate how wrong the guess was (Loss Function) and prune useless clutter wires", correct: true },
+          { text: "Take photos using infrared sensors", correct: false },
+          { text: "Display colorful graphics on the screen", correct: false },
+          { text: "Play music through the speakers", correct: false }
+        ],
+        explanation: "Correct! The kidneys measure waste and mistake penalties (Loss Function), allowing useless bloat wires to be pruned so the AI runs fast on mobile phones!"
+      }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+    let answered = false;
+
+    function renderQuestion() {
+      answered = false;
+      const data = quizQuestions[currentQ];
+      document.getElementById('qBadge').innerText = `QUESTION ${currentQ + 1} OF ${quizQuestions.length}`;
+      document.getElementById('qCategory').innerText = data.category;
+      document.getElementById('qText').innerText = data.question;
+      document.getElementById('questionCounter').innerText = `${currentQ + 1} of ${quizQuestions.length}`;
+
+      document.getElementById('feedbackBox').classList.add('hidden');
+      document.getElementById('nextBtn').classList.add('hidden');
+
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+
+      data.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3 rounded-xl bg-biolab-850 hover:bg-biolab-800 border border-biolab-700/70 text-xs sm:text-sm text-slate-200 transition flex items-center justify-between";
+        btn.innerHTML = `<span>${opt.text}</span><span class="text-slate-500 font-mono text-xs">#${idx + 1}</span>`;
+        btn.onclick = () => selectAnswer(btn, opt);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(btn, opt) {
+      if (answered) return;
+      answered = true;
+
+      const feedback = document.getElementById('feedbackBox');
+      const title = document.getElementById('feedbackTitle');
+      const explain = document.getElementById('feedbackExplain');
+      const nextBtn = document.getElementById('nextBtn');
+
+      feedback.classList.remove('hidden');
+      nextBtn.classList.remove('hidden');
+
+      if (opt.correct) {
+        score++;
+        btn.classList.add('opt-correct');
+        feedback.className = "mt-4 p-3.5 rounded-xl border border-emerald-600 bg-emerald-950/40 text-emerald-300";
+        title.innerHTML = "<span>✅</span><span>Brilliant! That's 100% Correct!</span>";
+      } else {
+        btn.classList.add('opt-wrong');
+        feedback.className = "mt-4 p-3.5 rounded-xl border border-rose-600 bg-rose-950/40 text-rose-300";
+        title.innerHTML = "<span>❌</span><span>Not quite! Check out the explanation below:</span>";
+      }
+
+      explain.innerText = quizQuestions[currentQ].explanation;
+      document.getElementById('headerScore').innerText = `Score: ${score} / ${quizQuestions.length}`;
+    }
+
+    function nextQuestion() {
+      currentQ++;
+      if (currentQ < quizQuestions.length) {
+        renderQuestion();
+      } else {
+        showFinal();
+      }
+    }
+
+    function showFinal() {
+      document.getElementById('quizCard').classList.add('hidden');
+      document.getElementById('finalCard').classList.remove('hidden');
+      document.getElementById('finalScoreDisplay').innerText = `${score} / ${quizQuestions.length} (${Math.round((score / quizQuestions.length) * 100)}%)`;
+
+      if (score >= 4 && typeof confetti === 'function') {
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      }
+    }
+
+    function restartQuiz() {
+      currentQ = 0;
+      score = 0;
+      document.getElementById('headerScore').innerText = `Score: 0 / ${quizQuestions.length}`;
+      document.getElementById('finalCard').classList.add('hidden');
+      document.getElementById('quizCard').classList.remove('hidden');
+      renderQuestion();
+    }
+
+    window.onload = function () {
+      renderQuestion();
+    };
+  </script>
+</body>
+</html>

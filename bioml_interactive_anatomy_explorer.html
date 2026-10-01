@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BioML: Body Explorer | Machine Learning Explained Through Human Anatomy</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            biolab: {
+              950: '#070b14',
+              900: '#0c1322',
+              850: '#111b2f',
+              800: '#16233e',
+              750: '#1a2b4c',
+              700: '#1f335b',
+              accent: '#38bdf8',
+            }
+          },
+          keyframes: {
+            gentlePulse: {
+              '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+              '50%': { transform: 'scale(1.05)', opacity: '0.85' },
+            },
+            flowParticles: {
+              '0%': { strokeDashoffset: '160' },
+              '100%': { strokeDashoffset: '0' }
+            },
+            heartThump: {
+              '0%, 100%': { transform: 'scale(1)' },
+              '15%': { transform: 'scale(1.18)' },
+              '30%': { transform: 'scale(1.05)' },
+              '45%': { transform: 'scale(1.14)' },
+              '60%': { transform: 'scale(1)' }
+            },
+            floatSlow: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-4px)' }
+            }
+          },
+          animation: {
+            'heart-thump': 'heartThump 1.2s ease-in-out infinite',
+            'gentle-pulse': 'gentlePulse 2.5s ease-in-out infinite',
+            'float-slow': 'floatSlow 3s ease-in-out infinite',
+            'pipeline-flow': 'flowParticles 1.5s linear infinite',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #070b14;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1f335b;
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #38bdf8;
+    }
+
+    /* Organ Interactive SVG Elements */
+    .organ-node {
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .organ-node:hover {
+      filter: drop-shadow(0 0 12px currentColor);
+      transform: scale(1.04);
+    }
+
+    .organ-active {
+      filter: drop-shadow(0 0 16px currentColor) !important;
+      transform: scale(1.05);
+    }
+
+    .organ-active .organ-shape {
+      stroke-width: 2.8px !important;
+      stroke-opacity: 1 !important;
+    }
+
+    .organ-active .badge-rect {
+      stroke-width: 1.8px !important;
+      stroke: #ffffff !important;
+    }
+
+    .organ-active text {
+      font-weight: 800 !important;
+    }
+
+    /* Pipeline Animated Dashed Line */
+    .pipeline-running {
+      stroke: #38bdf8 !important;
+      stroke-width: 3.2px !important;
+      stroke-dasharray: 8 6;
+      animation: flowParticles 1.2s linear infinite;
+    }
+
+    /* Glass Card */
+    .glass-card {
+      background: rgba(12, 19, 34, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(31, 51, 91, 0.7);
+    }
+  </style>
+</head>
+
+<body
+  class="bg-biolab-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden flex flex-col justify-between">
+
+  <!-- ==================== UNIFIED MULTI-PAGE NAVIGATION ==================== -->
+  <header class="border-b border-biolab-800 bg-biolab-900/90 backdrop-blur-md sticky top-0 z-50 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+
+      <!-- Brand & Title -->
+      <a href="bioml_interactive_anatomy_explorer.html" class="flex items-center space-x-2.5 group">
+        <div
+          class="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-rose-500 p-0.5 shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-biolab-950 rounded-[10px] flex items-center justify-center">
+            <span class="text-lg">🧬</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-extrabold tracking-tight text-lg text-white">Body<span
+                class="text-cyan-400">2</span>ML</span>
+            <span
+              class="text-[10px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-700/80 px-2 py-0.2 rounded-full hidden sm:inline-flex items-center gap-1">
+              Grade 10
+            </span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Multi-Page Links (Dedicated Pages for Different Features) -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="bioml_interactive_anatomy_explorer.html"
+          class="px-3 py-1.5 rounded-xl font-bold text-xs bg-cyan-950 border border-cyan-500 text-cyan-300 shadow-sm flex items-center gap-1.5 transition">
+          <span>🧬</span>
+          <span>Body Explorer</span>
+        </a>
+        <a href="story.html"
+          class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>🎬</span>
+          <span class="hidden sm:inline">How AI Thinks</span>
+          <span class="sm:hidden">Story</span>
+        </a>
+        <a href="quiz.html"
+          class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>🏆</span>
+          <span>Pop Quiz</span>
+        </a>
+        <a href="cheatsheet.html"
+          class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>📋</span>
+          <span class="hidden sm:inline">Cheat Sheet</span>
+          <span class="sm:hidden">Table</span>
+        </a>
+      </nav>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center gap-2">
+        <!-- View Mode: Story vs Code Peek -->
+        <button id="viewToggleBtn" onclick="toggleViewMode()"
+          class="px-2.5 py-1.5 rounded-xl border border-biolab-750 bg-biolab-850 hover:border-cyan-500 text-slate-300 hover:text-cyan-300 text-xs font-mono flex items-center gap-1.5 transition">
+          <span id="viewModeIcon">💻</span>
+          <span id="viewModeText" class="hidden md:inline">Code Peek</span>
+        </button>
+
+        <!-- Reset Button -->
+        <button onclick="resetView()" title="Reset to Brain"
+          class="p-2 rounded-xl border border-biolab-800 bg-biolab-850 hover:bg-biolab-800 text-slate-400 hover:text-white transition">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN PAGE CONTAINER (ONE-SCROLL STAGE) ==================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 space-y-3 w-full flex-1 flex flex-col justify-center">
+
+    <!-- Compact 1-Line Hook Bar -->
+    <div
+      class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-950/80 via-biolab-900 to-indigo-950/70 border border-cyan-800/40 shadow-sm backdrop-blur flex items-center justify-between text-xs">
+      <div class="flex items-center gap-2">
+        <span>💡</span>
+        <span class="text-slate-200">
+          <strong class="text-cyan-300 font-semibold">10th-Grade Secret:</strong> AI didn't invent magic—it copied the
+          human body! Tap any organ to see the code connection.
+        </span>
+      </div>
+      <div class="hidden md:flex items-center gap-2 font-mono text-[11px] text-cyan-300">
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        <span>Single-View Interactive Studio</span>
+      </div>
+    </div>
+
+    <!-- 2-COLUMN STAGE: FITS PERFECTLY IN ONE SCREEN -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 lg:gap-4 items-stretch">
+
+      <!-- LEFT COLUMN: Shrunk & Compact Interactive Body Map (5 Cols on LG) -->
+      <section
+        class="lg:col-span-5 glass-card rounded-2xl p-3 sm:p-3.5 shadow-xl relative flex flex-col items-center justify-between">
+
+        <!-- Header & Current Selection -->
+        <div class="w-full flex items-center justify-between pb-2 border-b border-biolab-800/80">
+          <div class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-cyan-400 shadow-sm shadow-cyan-400 animate-pulse"></span>
+            <span class="text-xs font-mono font-bold tracking-wider text-slate-200 uppercase">Body Scanner</span>
+          </div>
+          <span id="activeOrganPill"
+            class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cyan-950 border border-cyan-700 text-cyan-300 transition-all">
+            🧠 Brain Selected
+          </span>
+        </div>
+
+        <!-- Quick Organ Filter Chips -->
+        <div class="w-full py-1.5 flex gap-1 overflow-x-auto text-[11px] no-scrollbar select-none">
+          <button onclick="selectOrgan('eyes')"
+            class="chip-btn px-2.5 py-1 rounded-lg border border-biolab-800 bg-biolab-850 hover:border-amber-400 hover:text-amber-300 transition flex items-center gap-1 whitespace-nowrap"
+            data-target="eyes">
+            <span>👁️</span> Senses
+          </button>
+          <button onclick="selectOrgan('lungs')"
+            class="chip-btn px-2.5 py-1 rounded-lg border border-biolab-800 bg-biolab-850 hover:border-sky-400 hover:text-sky-300 transition flex items-center gap-1 whitespace-nowrap"
+            data-target="lungs">
+            <span>🫁</span> Lungs
+          </button>
+          <button onclick="selectOrgan('stomach')"
+            class="chip-btn px-2.5 py-1 rounded-lg border border-biolab-800 bg-biolab-850 hover:border-purple-400 hover:text-purple-300 transition flex items-center gap-1 whitespace-nowrap"
+            data-target="stomach">
+            <span>🥣</span> Gut
+          </button>
+          <button onclick="selectOrgan('liver')"
+            class="chip-btn px-2.5 py-1 rounded-lg border border-biolab-800 bg-biolab-850 hover:border-emerald-400 hover:text-emerald-300 transition flex items-center gap-1 whitespace-nowrap"
+            data-target="liver">
+            <span>🫀</span> Liver
+          </button>
+          <button onclick="selectOrgan('heart')"
+            class="chip-btn px-2.5 py-1 rounded-lg border border-biolab-800 bg-biolab-850 hover:border-rose-400 hover:text-rose-300 transition flex items-center gap-1 whitespace-nowrap"
+            data-target="heart">
+            <span>🫀</span> Heart
+          </button>
+          <button onclick="selectOrgan('brain')"
+            class="chip-btn px-2.5 py-1 rounded-lg border border-cyan-500 bg-biolab-750 text-cyan-300 transition flex items-center gap-1 whitespace-nowrap font-semibold shadow-sm"
+            data-target="brain">
+            <span>🧠</span> Brain
+          </button>
+          <button onclick="selectOrgan('kidneys')"
+            class="chip-btn px-2.5 py-1 rounded-lg border border-biolab-800 bg-biolab-850 hover:border-amber-400 hover:text-amber-300 transition flex items-center gap-1 whitespace-nowrap"
+            data-target="kidneys">
+            <span>🩺</span> Kidneys
+          </button>
+        </div>
+
+        <!-- SVG Body Canvas Container: Shrunk to ~350px for Single Screen View -->
+        <div class="relative w-full max-w-[250px] h-[350px] flex items-center justify-center my-0.5 select-none">
+
+          <!-- Background Grid lines -->
+          <div
+            class="absolute inset-0 bg-[radial-gradient(#1f335b_1.5px,transparent_1.5px)] [background-size:16px_16px] opacity-40 rounded-2xl pointer-events-none">
+          </div>
+
+          <!-- Pulsing Target Halo Behind Active Organ -->
+          <div id="activeHalo"
+            class="absolute pointer-events-none w-16 h-16 rounded-full bg-cyan-500/20 blur-lg transition-all duration-500">
+          </div>
+
+          <!-- SVG Body Canvas (Brain is at the top cranium, Eyes are below on face) -->
+          <svg id="anatomySvg" class="w-full h-full drop-shadow-[0_0_20px_rgba(56,189,248,0.2)]" viewBox="0 0 340 520"
+            fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="bodyOutlineGrad" x1="170" y1="20" x2="170" y2="500" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#38bdf8" stop-opacity="0.8" />
+                <stop offset="0.3" stop-color="#818cf8" stop-opacity="0.4" />
+                <stop offset="0.7" stop-color="#38bdf8" stop-opacity="0.3" />
+                <stop offset="1" stop-color="#0f172a" stop-opacity="0.9" />
+              </linearGradient>
+            </defs>
+
+            <!-- Holographic Coordinate Grid -->
+            <g opacity="0.25" stroke="#38bdf8" stroke-width="0.6">
+              <line x1="20" y1="80" x2="320" y2="80" stroke-dasharray="3 4" />
+              <line x1="20" y1="200" x2="320" y2="200" stroke-dasharray="3 4" />
+              <line x1="20" y1="320" x2="320" y2="320" stroke-dasharray="3 4" />
+              <line x1="170" y1="20" x2="170" y2="480" stroke-dasharray="3 5" />
+            </g>
+
+            <!-- Human Silhouette Body Contour -->
+            <path
+              d="M170 30 C 145 30, 135 50, 135 72 C 135 92, 148 108, 155 116 C 135 125, 95 145, 80 185 C 68 215, 60 270, 55 310 C 53 325, 68 332, 74 318 C 82 280, 92 230, 102 210 C 100 240, 102 310, 108 340 C 114 370, 120 410, 126 480 C 128 495, 148 495, 149 480 C 153 430, 158 370, 163 320 L 170 290 L 177 320 C 182 370, 187 430, 191 480 C 192 495, 212 495, 214 480 C 220 410, 226 370, 232 340 C 238 310, 240 240, 238 210 C 248 230, 258 280, 266 318 C 272 332, 287 325, 285 310 C 280 270, 272 215, 260 185 C 245 145, 205 125, 185 116 C 192 108, 205 92, 205 72 C 205 50, 195 30, 170 30 Z"
+              fill="#0c182c" stroke="url(#bodyOutlineGrad)" stroke-width="2" opacity="0.9" />
+
+            <!-- Nervous System Backbone Flow Line (from brainstem down) -->
+            <path id="spinePath" d="M170 76 L170 330" stroke="#4f46e5" stroke-width="2.5" stroke-dasharray="4 4"
+              opacity="0.65" />
+
+            <!-- ================= ORGAN NODES ================= -->
+
+            <!-- 6. BRAIN (Top Cranium) -->
+            <g id="organ-brain" class="organ-node organ-active text-cyan-400" onclick="selectOrgan('brain')">
+              <!-- Cerebrum Outer Contour -->
+              <path class="organ-shape" d="M170 38 
+                       C 156 35, 140 40, 138 52 
+                       C 136 63, 144 71, 154 73 
+                       C 162 75, 168 72, 170 70 
+                       C 172 72, 178 75, 186 73 
+                       C 196 71, 204 63, 202 52 
+                       C 200 40, 184 35, 170 38 Z" fill="#0284c7" fill-opacity="0.92" stroke="#38bdf8"
+                stroke-width="2.5" />
+              <!-- Cortex Gyri & Sulci (High Contrast Brain Folds) -->
+              <path d="M148 48 Q158 43 166 50 Q174 43 192 48 M144 58 Q156 64 170 56 Q184 64 196 58 M170 39 L170 68"
+                stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" fill="none" opacity="0.95" />
+              <!-- Synapse Node Pulsing Core -->
+              <circle cx="170" cy="53" r="3.5" fill="#ffffff" class="animate-ping" style="animation-duration: 2s;" />
+              <circle cx="170" cy="53" r="2.5" fill="#38bdf8" />
+              <!-- Leader line to Right Badge -->
+              <line x1="202" y1="52" x2="232" y2="52" stroke="#38bdf8" stroke-width="1.3" stroke-dasharray="2 2" />
+              <!-- Brain Badge Pill on Right -->
+              <rect class="badge-rect" x="232" y="42" width="76" height="20" rx="6" fill="#082f49" stroke="#38bdf8"
+                stroke-width="1.2" />
+              <text x="270" y="56" text-anchor="middle" font-size="8.5" fill="#7dd3fc"
+                font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">🧠 6. BRAIN</text>
+            </g>
+
+            <!-- 1. SENSORY / EYES (On Face, Below Brain) -->
+            <g id="organ-eyes" class="organ-node text-amber-400" onclick="selectOrgan('eyes')">
+              <path class="organ-shape" d="M149 80 Q158 77 165 81 M175 81 Q182 77 191 80" stroke="#f59e0b"
+                stroke-width="1.5" stroke-linecap="round" fill="none" />
+              <circle class="organ-shape" cx="157" cy="88" r="4.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" />
+              <circle cx="157" cy="88" r="2.2" fill="#d97706" />
+              <circle cx="157" cy="88" r="1" fill="#1e1b4b" />
+              <circle class="organ-shape" cx="183" cy="88" r="4.5" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5" />
+              <circle cx="183" cy="88" r="2.2" fill="#d97706" />
+              <circle cx="183" cy="88" r="1" fill="#1e1b4b" />
+              <path d="M157 83 Q162 76 168 72 M183 83 Q178 76 172 72" stroke="#fbbf24" stroke-width="1"
+                stroke-dasharray="1.5 2" opacity="0.75" fill="none" />
+              <line x1="104" y1="88" x2="148" y2="88" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="2 2" />
+              <rect class="badge-rect" x="34" y="78" width="70" height="20" rx="6" fill="#1c1917" stroke="#f59e0b"
+                stroke-width="1" />
+              <text x="69" y="92" text-anchor="middle" font-size="8.5" fill="#fbbf24"
+                font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">👁️ 1. EYES</text>
+            </g>
+
+            <!-- 2. LUNGS -->
+            <g id="organ-lungs" class="organ-node text-sky-400" onclick="selectOrgan('lungs')">
+              <path class="organ-shape"
+                d="M142 165 C 130 170, 124 195, 128 220 C 132 235, 148 238, 154 230 C 158 220, 156 185, 150 166 Z"
+                fill="#0369a1" stroke="#38bdf8" stroke-width="2" opacity="0.92" />
+              <path class="organ-shape"
+                d="M198 165 C 210 170, 216 195, 212 220 C 208 235, 192 238, 186 230 C 182 220, 184 185, 190 166 Z"
+                fill="#0369a1" stroke="#38bdf8" stroke-width="2" opacity="0.92" />
+              <path d="M146 185 Q136 200 144 215 M194 185 Q204 200 196 215" stroke="#bae6fd" stroke-width="1.5"
+                stroke-linecap="round" fill="none" />
+              <line x1="214" y1="192" x2="235" y2="192" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="2 2" />
+              <rect class="badge-rect" x="236" y="182" width="70" height="19" rx="6" fill="#082f49" stroke="#38bdf8"
+                stroke-width="1" />
+              <text x="271" y="195" text-anchor="middle" font-size="8.5" fill="#7dd3fc"
+                font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">🫁 2. LUNGS</text>
+            </g>
+
+            <!-- 3. STOMACH / GUT -->
+            <g id="organ-stomach" class="organ-node text-purple-400" onclick="selectOrgan('stomach')">
+              <path class="organ-shape"
+                d="M174 242 C 190 238, 199 250, 196 266 C 193 282, 178 286, 168 280 C 160 276, 164 258, 174 242 Z"
+                fill="#581c87" stroke="#c084fc" stroke-width="2" />
+              <line x1="198" y1="262" x2="230" y2="262" stroke="#c084fc" stroke-width="1.2" stroke-dasharray="2 2" />
+              <rect class="badge-rect" x="232" y="252" width="80" height="19" rx="6" fill="#2e1065" stroke="#c084fc"
+                stroke-width="1" />
+              <text x="272" y="265" text-anchor="middle" font-size="8.5" fill="#e9d5ff"
+                font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">🥣 3. STOMACH</text>
+            </g>
+
+            <!-- 4. LIVER -->
+            <g id="organ-liver" class="organ-node text-emerald-400" onclick="selectOrgan('liver')">
+              <path class="organ-shape"
+                d="M136 238 C 146 233, 166 234, 170 244 C 172 252, 166 265, 151 268 C 136 271, 126 254, 136 238 Z"
+                fill="#065f46" stroke="#34d399" stroke-width="2" />
+              <line x1="105" y1="250" x2="134" y2="250" stroke="#34d399" stroke-width="1.2" stroke-dasharray="2 2" />
+              <rect class="badge-rect" x="36" y="240" width="67" height="19" rx="6" fill="#022c22" stroke="#34d399"
+                stroke-width="1" />
+              <text x="69" y="253" text-anchor="middle" font-size="8.5" fill="#6ee7b7"
+                font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">🫀 4. LIVER</text>
+            </g>
+
+            <!-- 5. HEART -->
+            <g id="organ-heart" class="organ-node text-rose-500" onclick="selectOrgan('heart')">
+              <path class="organ-shape"
+                d="M168 188 C 163 178, 151 176, 145 186 C 137 198, 147 211, 168 226 C 189 211, 199 198, 191 186 C 185 176, 173 178, 168 188 Z"
+                fill="#9f1239" stroke="#f43f5e" stroke-width="2.4" class="animate-heart-thump" />
+              <circle cx="168" cy="198" r="3" fill="#ffe4e6" />
+              <line x1="102" y1="198" x2="142" y2="198" stroke="#f43f5e" stroke-width="1.2" stroke-dasharray="2 2" />
+              <rect class="badge-rect" x="30" y="188" width="70" height="19" rx="6" fill="#4c0519" stroke="#f43f5e"
+                stroke-width="1" />
+              <text x="65" y="201" text-anchor="middle" font-size="8.5" fill="#fda4af"
+                font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">❤️ 5. HEART</text>
+            </g>
+
+            <!-- 7. KIDNEYS -->
+            <g id="organ-kidneys" class="organ-node text-amber-500" onclick="selectOrgan('kidneys')">
+              <path class="organ-shape"
+                d="M148 288 C 143 286, 139 293, 141 302 C 143 310, 151 312, 154 305 C 156 298, 154 290, 148 288 Z"
+                fill="#78350f" stroke="#f59e0b" stroke-width="1.9" />
+              <path class="organ-shape"
+                d="M190 288 C 195 286, 199 293, 197 302 C 195 310, 187 312, 184 305 C 182 298, 184 290, 190 288 Z"
+                fill="#78350f" stroke="#f59e0b" stroke-width="1.9" />
+              <line x1="200" y1="300" x2="230" y2="300" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="2 2" />
+              <rect class="badge-rect" x="232" y="290" width="82" height="19" rx="6" fill="#451a03" stroke="#f59e0b"
+                stroke-width="1" />
+              <text x="273" y="303" text-anchor="middle" font-size="8.5" fill="#fde68a"
+                font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">🩺 7. KIDNEYS</text>
+            </g>
+
+          </svg>
+        </div>
+
+        <!-- Footnote / Step Buttons -->
+        <div
+          class="w-full mt-1 pt-2 border-t border-biolab-800/80 flex items-center justify-between text-[11px] text-slate-400">
+          <span class="flex items-center gap-1 text-cyan-300 font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+            Tap any organ to inspect
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button onclick="prevOrgan()"
+              class="p-1 rounded-lg bg-biolab-850 hover:bg-biolab-800 text-slate-300 text-[11px] px-2 border border-biolab-700">◀
+              Prev</button>
+            <button onclick="nextOrgan()"
+              class="p-1 rounded-lg bg-cyan-900/60 hover:bg-cyan-800 text-cyan-300 text-[11px] px-2 border border-cyan-700">Next
+              ▶</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Friendly Explanations & Interactive Mini-Playgrounds (7 Cols on LG) -->
+      <section class="lg:col-span-7 flex flex-col justify-between space-y-2.5">
+
+        <!-- Main Selected Organ Card -->
+        <div
+          class="glass-card rounded-2xl p-3.5 sm:p-4 shadow-xl relative overflow-hidden transition-all duration-300 flex-1 flex flex-col justify-between">
+
+          <!-- Top Organ Header with Fun Tag & Audio Button -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-biolab-800/80">
+            <div class="flex items-center gap-2.5">
+              <span id="organEmoji"
+                class="text-2xl p-1.5 rounded-xl bg-biolab-850 border border-biolab-700/80 shadow-md">🧠</span>
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h2 id="organName" class="text-lg sm:text-xl font-extrabold tracking-tight text-white">The Brain</h2>
+                  <span id="stepBadge"
+                    class="text-[10px] font-mono font-bold px-2 py-0.2 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-700">
+                    Step 6 of 7
+                  </span>
+                </div>
+                <p id="organHook" class="text-xs font-medium text-cyan-300">The Master Memory & Decision Maker</p>
+              </div>
+            </div>
+
+            <!-- Audio Voice Narration Button -->
+            <button onclick="speakCurrentOrgan()" id="speakBtn"
+              class="px-2.5 py-1 rounded-xl border border-cyan-800/80 bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 text-xs font-medium flex items-center gap-1.5 transition shadow-sm">
+              <span id="speakIcon">🔊</span>
+              <span id="speakText">Read to Me</span>
+            </button>
+          </div>
+
+          <!-- 10th-Grade High School Hook (Relatable Everyday Metaphor) -->
+          <div
+            class="my-2 p-2.5 rounded-xl bg-gradient-to-r from-biolab-850/90 to-biolab-800/50 border border-cyan-900/40 space-y-0.5 shadow-inner">
+            <div class="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wide">
+              <span>🍕</span>
+              <span>10th-Grade Everyday Analogy</span>
+            </div>
+            <p id="metaphorText" class="text-xs text-slate-200 leading-relaxed font-normal">
+              "Think of the brain as your memory when shooting free-throws in basketball. After shooting 500 balls, your
+              muscle memory remembers the exact wrist flick needed to score without having to do math each time!"
+            </p>
+          </div>
+
+          <!-- Two Side-by-Side Easy Explanations: Biology vs AI -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 my-2">
+
+            <!-- What it does in YOUR body -->
+            <div class="p-2.5 rounded-xl bg-rose-950/20 border border-rose-900/40 space-y-0.5">
+              <div class="flex items-center gap-1 text-[11px] font-bold text-rose-300 uppercase tracking-wider">
+                <span>🫀</span> What It Does in You (Biology)
+              </div>
+              <p id="bioDesc" class="text-xs text-slate-300 leading-relaxed">
+                Connects billions of tiny brain cells called neurons. Every time you study or practice, the connections
+                get stronger so you remember how to solve problems quickly.
+              </p>
+            </div>
+
+            <!-- What it does in the COMPUTER (AI) -->
+            <div class="p-2.5 rounded-xl bg-cyan-950/20 border border-cyan-900/40 space-y-0.5">
+              <div class="flex items-center gap-1 text-[11px] font-bold text-cyan-300 uppercase tracking-wider">
+                <span>🤖</span> What It Does in AI (Machine Learning)
+              </div>
+              <p id="mlDesc" class="text-xs text-slate-300 leading-relaxed">
+                Known as <span class="font-bold text-cyan-200">Neural Network Weights</span>. The AI stores millions of
+                little dial numbers. When an image enters, it multiplies by those numbers to guess: "That's a cat!"
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Real-Life Superpower -->
+          <div
+            class="p-2 rounded-xl bg-biolab-850/60 border border-biolab-800 text-xs text-slate-300 flex items-center gap-2">
+            <span class="text-sm">🚀</span>
+            <div>
+              <span class="font-bold text-white">Where is this used? </span>
+              <span id="superpowerText" class="text-slate-300">
+                Self-driving cars like Tesla use artificial brains to instantly decide when to brake if a ball bounces
+                into the street.
+              </span>
+            </div>
+          </div>
+
+          <!-- ================= INTERACTIVE MINI-EXPERIMENT ================= -->
+          <div class="mt-2.5 p-2.5 rounded-xl bg-biolab-950/80 border border-biolab-800 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 text-xs font-bold text-white">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="simTitle">Try It Yourself: The Cat vs Dog Decision Maker</span>
+              </div>
+              <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-800">
+                Interactive Lab
+              </span>
+            </div>
+
+            <!-- Dynamic Interactive Playground Area -->
+            <div id="simWorkspace"
+              class="w-full min-h-[95px] rounded-xl bg-biolab-900/90 p-2 border border-biolab-800/80 flex flex-col justify-center">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- ================= CODE PEEK (OPTIONAL) ================= -->
+          <div id="techCodeSection" class="mt-2 pt-2 border-t border-biolab-800 hidden">
+            <div class="flex items-center justify-between pb-1">
+              <div class="flex items-center gap-1.5 text-xs font-mono text-slate-300">
+                <span>💻</span>
+                <span id="codeTitle" class="font-semibold text-cyan-300">PyTorch Code Peek</span>
+              </div>
+              <button onclick="copySnippetCode()"
+                class="text-[11px] font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition px-2 py-0.5 rounded bg-biolab-850 border border-biolab-750">
+                <span id="copyCodeBtnText">📋 Copy</span>
+              </button>
+            </div>
+            <pre
+              class="bg-biolab-950 p-2 rounded-lg border border-biolab-800 text-[11px] font-mono text-cyan-300 overflow-x-auto"><code id="codeBlock"># PyTorch Model Layer
+import torch.nn as nn
+model = nn.Sequential(nn.Linear(784, 128), nn.ReLU(), nn.Linear(128, 2))</code></pre>
+          </div>
+
+        </div>
+
+        <!-- Quick Links to other Pages Bar -->
+        <div
+          class="flex items-center justify-between p-2.5 rounded-xl bg-biolab-900/60 border border-biolab-800/80 text-xs">
+          <span class="text-slate-400">Ready to test your knowledge or see the full story?</span>
+          <div class="flex items-center gap-2">
+            <a href="story.html"
+              class="px-2.5 py-1 rounded-lg bg-indigo-950/80 border border-indigo-700/80 text-indigo-300 hover:bg-indigo-900 transition flex items-center gap-1 font-medium">
+              <span>🎬</span> Story Tour &rarr;
+            </a>
+            <a href="quiz.html"
+              class="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-700/80 text-emerald-300 hover:bg-emerald-900 transition flex items-center gap-1 font-medium">
+              <span>🏆</span> Pop Quiz &rarr;
+            </a>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="toast"
+    class="fixed bottom-4 right-4 z-50 transform translate-y-16 opacity-0 transition-all duration-300 bg-cyan-950 border border-cyan-500 text-cyan-100 px-3.5 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs font-medium pointer-events-none">
+    <span class="text-cyan-400 text-base" id="toastIcon">✨</span>
+    <span id="toastMessage">Welcome to BioML!</span>
+  </div>
+
+  <!-- ==================== JAVASCRIPT ==================== -->
+  <script>
+    const bioMLDatabase = {
+      eyes: {
+        id: "eyes",
+        name: "The Sensory Eyes",
+        emoji: "👁️",
+        stepNumber: "Step 1 of 7",
+        hook: "The Camera & Optical Scanner",
+        metaphor: "\"Holding a magnifying glass over your TV screen to see that every photo is just millions of tiny glowing Red, Green, and Blue colored light bulbs!\"",
+        bioDesc: "Your eyes have millions of tiny sensors (rods & cones). When light bounces off a dog, they translate that light into electrical signals sent to your brain.",
+        mlDesc: "Known as Computer Vision. Computers don't have eyeballs, so they use digital cameras to turn pictures into a grid of numbers from 0 to 255 for Red, Green, and Blue (RGB).",
+        superpower: "Facial recognition on your phone (Face ID) and Snapchat photo filters rely on artificial eyes!",
+        codeTitle: "PyTorch Vision: Photos to Tensors",
+        codeSnippet: `from PIL import Image
+import torchvision.transforms as T
+
+# Turn camera image into a 3D grid of numbers [Red, Green, Blue]
+turn_to_numbers = T.ToTensor()
+image_numbers = turn_to_numbers(Image.open("dog.jpg"))`,
+        simTitle: "Interactive Mini-Eye: Tap pixels to 'see' RGB numbers!",
+        renderSim: () => `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-300">Tap any pixel on the retina below:</span>
+              <span id="pixelStat" class="font-mono text-amber-300 font-bold">Selected: [R:240, G:60, B:60]</span>
+            </div>
+            <div class="flex items-center justify-center p-2 bg-biolab-950 rounded-xl border border-biolab-800">
+              <div id="sensorGrid" class="grid grid-cols-8 gap-1">
+                <!-- 64 pixels rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      lungs: {
+        id: "lungs",
+        name: "The Respiratory Lungs",
+        emoji: "🫁",
+        stepNumber: "Step 2 of 7",
+        hook: "The Fair Scale & Data Normalizer",
+        metaphor: "\"Imagine grading a test out of 100 points against a quiz out of 10 points. Without converting both to percentages (0% to 100%), the big test bullies the little quiz!\"",
+        bioDesc: "Your lungs take in dirty atmospheric air (dust, nitrogen, pollution), filter it out, and deliver clean, balanced oxygen into your bloodstream at steady pressure.",
+        mlDesc: "Known as Feature Scaling / Normalization. Raw data has crazy mixed units (like Age: 15 vs House Price: $450,000). The lungs squeeze all numbers into a fair 0.0 to 1.0 scale.",
+        superpower: "Weather forecast apps normalize thousands of air pressure, humidity, and temperature numbers to predict tomorrow's rain!",
+        codeTitle: "Scikit-Learn: Scaling Numbers 0.0 to 1.0",
+        codeSnippet: `from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+fair_data = scaler.fit_transform(raw_student_stats)`,
+        simTitle: "Interactive Lung: Scale an Exam Score to a Fair 0% - 100% Curve",
+        renderSim: () => `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-300">Raw Exam Score (out of 250):</span>
+              <span id="lungRawDisplay" class="font-mono text-sky-300 font-bold">175 pts</span>
+            </div>
+            <input type="range" min="0" max="250" value="175" id="lungSlider" oninput="updateLungDemo(this.value)" class="w-full accent-sky-400 cursor-pointer">
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-0.5">
+              <div class="p-1.5 rounded-lg bg-biolab-950 border border-biolab-800 text-center">
+                <span class="block text-[9px] text-slate-500">RAW CONFUSING INPUT</span>
+                <span id="rawBox" class="text-xs font-bold text-white">175</span>
+              </div>
+              <div class="p-1.5 rounded-lg bg-sky-950/80 border border-sky-700 text-center">
+                <span class="block text-[9px] text-sky-400">FAIR LUNG NORMALIZED</span>
+                <span id="normBox" class="text-xs font-bold text-sky-300">0.7000 (70%)</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      stomach: {
+        id: "stomach",
+        name: "The Stomach & Gut",
+        emoji: "🥣",
+        stepNumber: "Step 3 of 7",
+        hook: "The Sentence Slicer & Tokenizer",
+        metaphor: "\"Breaking down a giant cheeseburger into bite-sized calories—or taking a giant LEGO fortress and taking it apart into single colored bricks!\"",
+        bioDesc: "Your stomach can't send a whole pizza slice directly into your bloodstream. It chemically chops it into tiny amino acids and vitamins.",
+        mlDesc: "Known as Tokenization in ChatGPT. An AI can't read an entire essay all at once! The stomach slices sentences into small word bites called 'tokens' with ID numbers.",
+        superpower: "ChatGPT, Siri, and Google Translate use this to understand any language on earth!",
+        codeTitle: "HuggingFace: Tokenizing Words like ChatGPT",
+        codeSnippet: `from transformers import AutoTokenizer
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+tokens = tokenizer.tokenize("Machine learning is fun!")`,
+        simTitle: "Interactive Stomach: Type ANY sentence to chop into token blocks!",
+        renderSim: () => `
+          <div class="space-y-1.5">
+            <input type="text" id="gutInput" value="I love artificial intelligence and biology" oninput="updateGutDemo(this.value)" class="w-full bg-biolab-950 border border-biolab-700/80 rounded-lg px-2.5 py-1 text-xs text-purple-200 focus:border-purple-400 focus:outline-none">
+            <div id="tokenContainer" class="flex flex-wrap gap-1 min-h-[32px] p-1.5 rounded-lg bg-biolab-950 border border-biolab-800">
+              <!-- Tokens -->
+            </div>
+          </div>
+        `
+      },
+
+      liver: {
+        id: "liver",
+        name: "The Hepatic Liver",
+        emoji: "🫀",
+        stepNumber: "Step 4 of 7",
+        hook: "The Spam Filter & Anti-Cheating Coach",
+        metaphor: "\"A teacher giving surprise pop quizzes with different questions, so you learn how to think instead of just memorizing yesterday's test answers!\"",
+        bioDesc: "Your liver filters toxins and prevents dangerous junk from making the rest of your body sick.",
+        mlDesc: "Known as Data Cleaning & Dropout (Regularization). If an AI simply memorizes the answers ('overfitting'), it will fail on new questions. The liver randomly hides clues during practice!",
+        superpower: "Instagram and TikTok spam filters use this to throw away fake bot comments!",
+        codeTitle: "PyTorch: Dropout Anti-Cheating",
+        codeSnippet: `self.liver_dropout = nn.Dropout(p=0.30)
+# Randomly mutes 30% of connections to prevent cheating`,
+        simTitle: "Interactive Liver: The 'Anti-Cheating' Dropout Bouncer",
+        renderSim: () => `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-300">Dropout Filter Rate:</span>
+              <span id="dropoutDisplay" class="font-mono text-emerald-400 font-bold">30% Filtered</span>
+            </div>
+            <input type="range" min="0" max="70" step="10" value="30" id="liverSlider" oninput="updateLiverDemo(this.value)" class="w-full accent-emerald-400 cursor-pointer">
+            <div id="dropoutGrid" class="grid grid-cols-10 gap-1 p-1.5 bg-biolab-950 rounded-lg border border-biolab-800">
+              <!-- Grid -->
+            </div>
+          </div>
+        `
+      },
+
+      heart: {
+        id: "heart",
+        name: "The Human Heart",
+        emoji: "❤️",
+        stepNumber: "Step 5 of 7",
+        hook: "The Workout Pulse & Training Loop",
+        metaphor: "\"A coach blowing a whistle during soccer drills: 'Pass, shoot, adjust!' Every whistle is one practice rep that builds muscle memory.\"",
+        bioDesc: "Contracts rhythmically 60-100 times per minute, delivering fresh oxygen to your muscles so they can work out, recover, and grow stronger.",
+        mlDesc: "Known as the Training Loop (Epochs & Optimizer). Each heartbeat pushes a batch of flashcards through the AI model, checks mistakes, and updates brain dials.",
+        superpower: "Self-driving cars undergo billions of simulated driving heartbeats before touching real road asphalt!",
+        codeTitle: "PyTorch: Training Loop Pulse",
+        codeSnippet: `for heartbeat in range(100):
+    optimizer.zero_grad()
+    guess = model(flashcards)
+    error = loss_func(guess)
+    error.backward()
+    optimizer.step()`,
+        simTitle: "Interactive Heart: Speed up Workout Pulse to Boost AI Accuracy!",
+        renderSim: () => `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-300">Heartbeat / Practice Speed:</span>
+              <span id="bpmDisplay" class="font-mono text-rose-400 font-bold">75 BPM (Steady Learning)</span>
+            </div>
+            <input type="range" min="40" max="160" step="5" value="75" id="heartSlider" oninput="updateHeartDemo(this.value)" class="w-full accent-rose-500 cursor-pointer">
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono pt-0.5">
+              <div class="p-1.5 rounded-lg bg-biolab-950 border border-biolab-800 text-center">
+                <span class="block text-[9px] text-slate-500">PRACTICE REPS</span>
+                <span id="epochDisplay" class="text-xs font-bold text-white">Rep #42</span>
+              </div>
+              <div class="p-1.5 rounded-lg bg-rose-950/60 border border-rose-800 text-center">
+                <span class="block text-[9px] text-rose-300">AI TEST ACCURACY</span>
+                <span id="accDisplay" class="text-xs font-bold text-emerald-400">92.4% Correct!</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      brain: {
+        id: "brain",
+        name: "The Human Brain",
+        emoji: "🧠",
+        stepNumber: "Step 6 of 7",
+        hook: "The Master Memory & Decision Maker",
+        metaphor: "\"Practicing guitar chords until your fingers automatically jump to the right frets without having to look down!\"",
+        bioDesc: "Contains 86 billion neurons connected by synapses. When you learn to ride a bike, synaptic connections physically get stronger so balancing becomes automatic.",
+        mlDesc: "Known as Model Weights & Inference. Millions of connection dials (Weights 'W' and Biases 'b') are saved in computer memory. When an image enters, the dials output the answer!",
+        superpower: "Powers Google Search, YouTube video recommendations, and Siri understanding your voice!",
+        codeTitle: "PyTorch: Neural Decision Layer",
+        codeSnippet: `class BrainDecision(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.synapses = nn.Linear(784, 2) # Cat or Dog`,
+        simTitle: "Interactive Brain: Adjust Connection Strength to Fire the Neuron!",
+        renderSim: () => `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-300">Synapse Connection Strength (Weight dial):</span>
+              <span id="weightDisplay" class="font-mono text-cyan-300 font-bold">0.80</span>
+            </div>
+            <input type="range" min="0" max="1" step="0.05" value="0.8" id="brainSlider" oninput="updateBrainDemo(this.value)" class="w-full accent-cyan-400 cursor-pointer">
+            <div class="flex items-center justify-between gap-1.5 pt-0.5 text-center text-xs">
+              <div class="flex-1 p-1.5 rounded-lg bg-biolab-950 border border-biolab-800">
+                <span class="block text-[9px] text-slate-500 font-mono">INPUT SIGNAL</span>
+                <span class="text-xs font-mono font-bold text-slate-200">Pointy Ears (0.9)</span>
+              </div>
+              <span class="text-cyan-400 font-bold">&times;</span>
+              <div class="flex-1 p-1.5 rounded-lg bg-biolab-950 border border-biolab-800">
+                <span class="block text-[9px] text-slate-500 font-mono">WEIGHT DIAL</span>
+                <span id="dialVal" class="text-xs font-mono font-bold text-cyan-300">0.80</span>
+              </div>
+              <span class="text-cyan-400 font-bold">=</span>
+              <div class="flex-1 p-1.5 rounded-lg bg-cyan-950/80 border border-cyan-700">
+                <span class="block text-[9px] text-cyan-300 font-mono">DECISION</span>
+                <span id="brainOutcome" class="text-xs font-mono font-bold text-emerald-400">CAT! 🐱</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      kidneys: {
+        id: "kidneys",
+        name: "The Renal Kidneys",
+        emoji: "🩺",
+        stepNumber: "Step 7 of 7",
+        hook: "The Mistake Meter & Waste Pruner",
+        metaphor: "\"A teacher grading your homework with a red pen to mark mistakes, and pruning away useless clutter scribbles!\"",
+        bioDesc: "Continuously filters your blood, measures excess waste, and flushes what the body doesn't need to keep you healthy.",
+        mlDesc: "Known as the Loss Function & Pruning. The Loss Function measures mistakes. Then Pruning trims away useless wires so the AI runs on small smartwatches and phones without battery drain!",
+        superpower: "Allows powerful AIs to run directly inside smartwatches and mobile chips without lagging!",
+        codeTitle: "PyTorch: Calculating Loss & Pruning",
+        codeSnippet: `mistake_score = F.cross_entropy(ai_guesses, correct_answers)
+prune.l1_unstructured(model.synapses, name="weight", amount=0.20)`,
+        simTitle: "Interactive Kidneys: Inspect the Mistake Meter (Loss)",
+        renderSim: () => `
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-slate-300">Mistakes on Homework (Loss Score):</span>
+              <span id="lossDisplay" class="font-mono text-emerald-400 font-bold">0.12 (Grade A+! AI is Smart!)</span>
+            </div>
+            <input type="range" min="0" max="100" value="12" id="kidneySlider" oninput="updateKidneyDemo(this.value)" class="w-full accent-amber-500 cursor-pointer">
+            <div class="w-full bg-biolab-950 h-3 rounded-full overflow-hidden border border-biolab-800 p-0.5">
+              <div id="lossFillBar" class="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 transition-all duration-300" style="width: 12%;"></div>
+            </div>
+          </div>
+        `
+      }
+    };
+
+    const organOrder = ['eyes', 'lungs', 'stomach', 'liver', 'heart', 'brain', 'kidneys'];
+    let currentOrganIndex = 5; // Default to Brain
+    let viewMode = 'story';
+
+    function selectOrgan(organId) {
+      if (!bioMLDatabase[organId]) return;
+      const data = bioMLDatabase[organId];
+      currentOrganIndex = organOrder.indexOf(organId);
+
+      // Highlight SVG
+      document.querySelectorAll('.organ-node').forEach(node => node.classList.remove('organ-active'));
+      const svgNode = document.getElementById(`organ-${organId}`);
+      if (svgNode) svgNode.classList.add('organ-active');
+
+      positionHalo(organId);
+
+      // Highlight chip
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        if (btn.getAttribute('data-target') === organId) {
+          btn.classList.add('border-cyan-500', 'text-cyan-300', 'bg-biolab-750', 'font-semibold', 'shadow-sm');
+          btn.classList.remove('border-biolab-800', 'bg-biolab-850', 'text-slate-300');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (e) { }
+        } else {
+          btn.classList.remove('border-cyan-500', 'text-cyan-300', 'bg-biolab-750', 'font-semibold', 'shadow-sm');
+          btn.classList.add('border-biolab-800', 'bg-biolab-850', 'text-slate-300');
+        }
+      });
+
+      // Update Pill
+      document.getElementById('activeOrganPill').innerText = `${data.emoji} ${data.name.replace('The Human ', '').replace('The ', '')} Selected`;
+
+      // Update Card fields
+      document.getElementById('organEmoji').innerText = data.emoji;
+      document.getElementById('organName').innerText = data.name;
+      document.getElementById('stepBadge').innerText = data.stepNumber;
+      document.getElementById('organHook').innerText = data.hook;
+      document.getElementById('metaphorText').innerText = data.metaphor;
+      document.getElementById('bioDesc').innerText = data.bioDesc;
+      document.getElementById('mlDesc').innerText = data.mlDesc;
+      document.getElementById('superpowerText').innerText = data.superpower;
+      document.getElementById('simTitle').innerText = data.simTitle;
+
+      document.getElementById('codeTitle').innerText = data.codeTitle;
+      document.getElementById('codeBlock').innerText = data.codeSnippet;
+
+      // Render Simulation
+      const workspace = document.getElementById('simWorkspace');
+      workspace.innerHTML = data.renderSim();
+
+      if (organId === 'eyes') renderEyesSensorGrid();
+      if (organId === 'lungs') updateLungDemo(175);
+      if (organId === 'stomach') updateGutDemo("I love artificial intelligence and biology");
+      if (organId === 'liver') updateLiverDemo(30);
+      if (organId === 'heart') updateHeartDemo(75);
+      if (organId === 'brain') updateBrainDemo(0.8);
+      if (organId === 'kidneys') updateKidneyDemo(12);
+    }
+
+    function positionHalo(organId) {
+      const halo = document.getElementById('activeHalo');
+      if (!halo) return;
+      const positions = {
+        brain: { top: '10%', left: '42%' },
+        eyes: { top: '17%', left: '42%' },
+        lungs: { top: '35%', left: '42%' },
+        heart: { top: '36%', left: '42%' },
+        stomach: { top: '48%', left: '42%' },
+        liver: { top: '46%', left: '38%' },
+        kidneys: { top: '55%', left: '42%' }
+      };
+      const pos = positions[organId] || { top: '30%', left: '40%' };
+      halo.style.top = pos.top;
+      halo.style.left = pos.left;
+    }
+
+    function nextOrgan() {
+      currentOrganIndex = (currentOrganIndex + 1) % organOrder.length;
+      selectOrgan(organOrder[currentOrganIndex]);
+    }
+
+    function prevOrgan() {
+      currentOrganIndex = (currentOrganIndex - 1 + organOrder.length) % organOrder.length;
+      selectOrgan(organOrder[currentOrganIndex]);
+    }
+
+    function resetView() {
+      selectOrgan('brain');
+      showToast("Reset to Brain view!", "🧠");
+    }
+
+    function toggleViewMode() {
+      const codeSec = document.getElementById('techCodeSection');
+      const text = document.getElementById('viewModeText');
+      const icon = document.getElementById('viewModeIcon');
+      if (viewMode === 'story') {
+        viewMode = 'tech';
+        codeSec.classList.remove('hidden');
+        if (text) text.innerText = "Hide Code";
+        if (icon) icon.innerText = "🌱";
+        showToast("Code Peek active!", "💻");
+      } else {
+        viewMode = 'story';
+        codeSec.classList.add('hidden');
+        if (text) text.innerText = "Code Peek";
+        if (icon) icon.innerText = "💻";
+        showToast("Story Mode active!", "🌱");
+      }
+    }
+
+    // Mini experiments
+    function renderEyesSensorGrid() {
+      const grid = document.getElementById('sensorGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      for (let i = 0; i < 64; i++) {
+        const pixel = document.createElement('div');
+        const r = Math.floor(Math.random() * 180) + 70;
+        const g = Math.floor(r * 0.7);
+        const b = Math.floor(Math.random() * 80) + 30;
+        pixel.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        pixel.className = "w-3 h-3 rounded-sm cursor-pointer hover:scale-125 transition-transform border border-black/40";
+        pixel.onclick = function () {
+          this.style.backgroundColor = '#38bdf8';
+          const stat = document.getElementById('pixelStat');
+          if (stat) stat.innerText = `Pixel #${i}: [R:${r}, G:${g}, B:${b}]`;
+          showToast(`Optical signal fired to brain!`, "⚡");
+        };
+        grid.appendChild(pixel);
+      }
+    }
+
+    function updateLungDemo(val) {
+      const rawElem = document.getElementById('lungRawDisplay');
+      const rawBox = document.getElementById('rawBox');
+      const normBox = document.getElementById('normBox');
+      if (rawElem) rawElem.innerText = `${val} pts`;
+      if (rawBox) rawBox.innerText = val;
+      const normalized = (val / 250).toFixed(4);
+      const pct = Math.round((val / 250) * 100);
+      if (normBox) normBox.innerText = `${normalized} (${pct}%)`;
+    }
+
+    function updateGutDemo(text) {
+      const container = document.getElementById('tokenContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!text.trim()) {
+        container.innerHTML = `<span class="text-[11px] text-slate-500 italic">Type above to see tokens...</span>`;
+        return;
+      }
+      const words = text.trim().split(/\s+/);
+      words.forEach((w, idx) => {
+        let hash = 0;
+        for (let i = 0; i < w.length; i++) hash = (hash << 5) - hash + w.charCodeAt(i);
+        const tokenId = Math.abs(hash % 9000) + 1000;
+        const badge = document.createElement('div');
+        badge.className = "flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-950/80 border border-purple-700/80 text-[11px] font-mono text-purple-200 animate-float-slow";
+        badge.style.animationDelay = `${idx * 0.1}s`;
+        badge.innerHTML = `<span class="text-white font-bold">"${w}"</span><span class="text-[9px] text-purple-300">id:${tokenId}</span>`;
+        container.appendChild(badge);
+      });
+    }
+
+    function updateLiverDemo(pct) {
+      const display = document.getElementById('dropoutDisplay');
+      if (display) display.innerText = `${pct}% Filtered`;
+      const grid = document.getElementById('dropoutGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      const total = 20;
+      const droppedCount = Math.round((pct / 100) * total);
+      for (let i = 0; i < total; i++) {
+        const isDropped = i < droppedCount;
+        const dot = document.createElement('div');
+        dot.className = `h-4 rounded flex items-center justify-center text-[9px] font-mono transition-all font-bold ${isDropped ? 'bg-rose-950/60 border border-rose-800 text-rose-400 line-through opacity-40' : 'bg-emerald-950 border border-emerald-600 text-emerald-300'
+          }`;
+        dot.innerText = isDropped ? 'OFF' : 'ON';
+        grid.appendChild(dot);
+      }
+    }
+
+    function updateHeartDemo(bpm) {
+      const display = document.getElementById('bpmDisplay');
+      const epochDisplay = document.getElementById('epochDisplay');
+      const accDisplay = document.getElementById('accDisplay');
+      if (display) display.innerText = `${bpm} BPM (Practice Pulse)`;
+      const reps = Math.floor(bpm * 0.8);
+      if (epochDisplay) epochDisplay.innerText = `Rep #${reps}`;
+      const accuracy = Math.min(99.4, 45 + (bpm * 0.38)).toFixed(1);
+      if (accDisplay) accDisplay.innerText = `${accuracy}% Correct!`;
+    }
+
+    function updateBrainDemo(weight) {
+      const display = document.getElementById('weightDisplay');
+      const dial = document.getElementById('dialVal');
+      const outcome = document.getElementById('brainOutcome');
+      if (display) display.innerText = parseFloat(weight).toFixed(2);
+      if (dial) dial.innerText = parseFloat(weight).toFixed(2);
+      const score = 0.9 * parseFloat(weight);
+      if (score >= 0.45) {
+        if (outcome) {
+          outcome.innerText = `CAT! 🐱 (${score.toFixed(2)})`;
+          outcome.className = "text-xs font-mono font-bold text-emerald-400";
+        }
+      } else {
+        if (outcome) {
+          outcome.innerText = `DOG? 🐶 (${score.toFixed(2)})`;
+          outcome.className = "text-xs font-mono font-bold text-amber-400";
+        }
+      }
+    }
+
+    function updateKidneyDemo(loss) {
+      const display = document.getElementById('lossDisplay');
+      const bar = document.getElementById('lossFillBar');
+      if (bar) bar.style.width = `${loss}%`;
+      const normalized = (loss / 100).toFixed(2);
+      if (loss <= 20) {
+        if (display) {
+          display.innerText = `${normalized} (Grade A+! AI is Smart!)`;
+          display.className = "font-mono text-emerald-400 font-bold";
+        }
+      } else if (loss <= 50) {
+        if (display) {
+          display.innerText = `${normalized} (Grade B: Decent)`;
+          display.className = "font-mono text-amber-400 font-bold";
+        }
+      } else {
+        if (display) {
+          display.innerText = `${normalized} (Grade F: Mistake prone)`;
+          display.className = "font-mono text-rose-400 font-bold";
+        }
+      }
+    }
+
+    function speakCurrentOrgan() {
+      const data = bioMLDatabase[organOrder[currentOrganIndex]];
+      if (!('speechSynthesis' in window)) {
+        showToast("Speech synthesis not supported.", "⚠️");
+        return;
+      }
+      const speakBtnText = document.getElementById('speakText');
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        speakBtnText.innerText = "Read to Me";
+        return;
+      }
+      const script = `${data.name}. Analogy: ${data.metaphor}. In your body, ${data.bioDesc}. In machine learning, ${data.mlDesc}`;
+      const utterance = new SpeechSynthesisUtterance(script);
+      utterance.rate = 0.95;
+      utterance.onstart = () => {
+        speakBtnText.innerText = "Listening...";
+        showToast(`Narrating ${data.name}...`, "🔊");
+      };
+      utterance.onend = () => {
+        speakBtnText.innerText = "Read to Me";
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function copySnippetCode() {
+      const code = document.getElementById('codeBlock').innerText;
+      const dummy = document.createElement("textarea");
+      document.body.appendChild(dummy);
+      dummy.value = code;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      showToast("Code copied to clipboard!", "📋");
+      const btn = document.getElementById('copyCodeBtnText');
+      btn.innerText = "Copied!";
+      setTimeout(() => btn.innerText = "Copy", 2000);
+    }
+
+    let toastTimeout = null;
+    function showToast(message, icon = "✨") {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      toastMsg.innerText = message;
+      toastIcon.innerText = icon;
+      toast.classList.remove('translate-y-16', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-16', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 3000);
+    }
+
+    window.onload = function () {
+      selectOrgan('brain');
+    };
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BioML: The Rosetta Stone Cheat Sheet | Grade 10 Edition</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            biolab: {
+              950: '#070b14',
+              900: '#0c1322',
+              850: '#111b2f',
+              800: '#16233e',
+              750: '#1a2b4c',
+              700: '#1f335b',
+              accent: '#38bdf8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #070b14; }
+    ::-webkit-scrollbar-thumb { background: #1f335b; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+    .glass-card {
+      background: rgba(12, 19, 34, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(31, 51, 91, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-biolab-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500 selection:text-black overflow-x-hidden flex flex-col justify-between">
+
+  <!-- ==================== UNIFIED MULTI-PAGE NAVIGATION ==================== -->
+  <header class="border-b border-biolab-800 bg-biolab-900/90 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      
+      <!-- Brand & Title -->
+      <a href="bioml_interactive_anatomy_explorer.html" class="flex items-center space-x-2.5 group">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-rose-500 p-0.5 shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-biolab-950 rounded-[10px] flex items-center justify-center">
+            <span class="text-lg">🧬</span>
+          </div>
+        </div>
+        <div>
+          <span class="font-extrabold tracking-tight text-lg text-white">Body<span class="text-cyan-400">2</span>ML</span>
+        </div>
+      </a>
+
+      <!-- Multi-Page Links -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a href="bioml_interactive_anatomy_explorer.html" class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>🧬</span>
+          <span>Body Explorer</span>
+        </a>
+        <a href="story.html" class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>🎬</span>
+          <span class="hidden sm:inline">How AI Thinks</span>
+          <span class="sm:hidden">Story</span>
+        </a>
+        <a href="quiz.html" class="px-3 py-1.5 rounded-xl font-medium text-xs text-slate-300 hover:text-white hover:bg-biolab-850 border border-transparent hover:border-biolab-750 flex items-center gap-1.5 transition">
+          <span>🏆</span>
+          <span>Pop Quiz</span>
+        </a>
+        <a href="cheatsheet.html" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-cyan-950 border border-cyan-500 text-cyan-300 shadow-sm flex items-center gap-1.5 transition">
+          <span>📋</span>
+          <span class="hidden sm:inline">Cheat Sheet</span>
+          <span class="sm:hidden">Table</span>
+        </a>
+      </nav>
+
+      <!-- Copy Markdown Button -->
+      <button onclick="copyMarkdownTable()" class="px-3 py-1.5 rounded-xl border border-cyan-800 bg-cyan-950/80 hover:bg-cyan-900 text-xs font-semibold text-cyan-300 flex items-center gap-1.5 transition shadow-sm">
+        <span>📋</span>
+        <span id="copyTableBtnText">Copy README Table</span>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CHEAT SHEET STAGE (ONE-SCROLL) ==================== -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex-1 flex flex-col justify-center space-y-4 w-full">
+
+    <!-- Top Card: Search Bar & Info -->
+    <div class="glass-card rounded-2xl p-4 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+          <span>📋</span> The Body-to-AI Rosetta Stone
+        </h1>
+        <p class="text-xs text-slate-400">High School Study Guide: Search any organ or AI concept to filter instantly.</p>
+      </div>
+      <!-- Instant Search Filter -->
+      <div class="relative w-full sm:w-64">
+        <input type="text" id="searchInput" oninput="filterTable(this.value)" placeholder="Search (e.g. Brain, Loss, ChatGPT)..." class="w-full bg-biolab-950 border border-biolab-700/80 rounded-xl px-3 py-1.5 text-xs text-cyan-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition">
+        <span class="absolute right-2.5 top-1.5 text-slate-500 text-xs">🔍</span>
+      </div>
+    </div>
+
+    <!-- Rosetta Stone Table Card -->
+    <div class="glass-card rounded-3xl p-5 shadow-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-biolab-800 font-mono text-slate-400 bg-biolab-950/60">
+              <th class="py-2.5 px-3.5">Organ</th>
+              <th class="py-2.5 px-3.5">What it Does in You</th>
+              <th class="py-2.5 px-3.5">What it Does in AI</th>
+              <th class="py-2.5 px-3.5">10th-Grade Analogy</th>
+              <th class="py-2.5 px-3.5 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-biolab-800/60 text-slate-300" id="tableBody">
+            <tr class="table-row hover:bg-biolab-850/60 transition">
+              <td class="py-3 px-3.5 font-bold text-white flex items-center gap-2"><span>👁️</span> Senses (Eyes)</td>
+              <td class="py-3 px-3.5 text-slate-300">Turns light photons into nerve signals</td>
+              <td class="py-3 px-3.5 font-semibold text-amber-300">Computer Vision (RGB Pixels to Numbers)</td>
+              <td class="py-3 px-3.5 text-slate-300">Zooming into your phone screen to see red, green, blue dots</td>
+              <td class="py-3 px-3.5 text-right"><a href="bioml_interactive_anatomy_explorer.html" class="text-cyan-400 hover:text-cyan-300 font-semibold">Inspect &rarr;</a></td>
+            </tr>
+            <tr class="table-row hover:bg-biolab-850/60 transition">
+              <td class="py-3 px-3.5 font-bold text-white flex items-center gap-2"><span>🫁</span> Lungs</td>
+              <td class="py-3 px-3.5 text-slate-300">Inhales messy air, pulls out pure $O_2$</td>
+              <td class="py-3 px-3.5 font-semibold text-sky-300">Feature Scaling & Normalization (0.0 to 1.0)</td>
+              <td class="py-3 px-3.5 text-slate-300">Grading on a percentage curve (0% to 100%) so tests are fair</td>
+              <td class="py-3 px-3.5 text-right"><a href="bioml_interactive_anatomy_explorer.html" class="text-cyan-400 hover:text-cyan-300 font-semibold">Inspect &rarr;</a></td>
+            </tr>
+            <tr class="table-row hover:bg-biolab-850/60 transition">
+              <td class="py-3 px-3.5 font-bold text-white flex items-center gap-2"><span>🥣</span> Stomach & Gut</td>
+              <td class="py-3 px-3.5 text-slate-300">Breaks meals into micro-nutrients</td>
+              <td class="py-3 px-3.5 font-semibold text-purple-300">Tokenization & Word Embeddings</td>
+              <td class="py-3 px-3.5 text-slate-300">Breaking a giant LEGO castle into individual colored bricks</td>
+              <td class="py-3 px-3.5 text-right"><a href="bioml_interactive_anatomy_explorer.html" class="text-cyan-400 hover:text-cyan-300 font-semibold">Inspect &rarr;</a></td>
+            </tr>
+            <tr class="table-row hover:bg-biolab-850/60 transition">
+              <td class="py-3 px-3.5 font-bold text-white flex items-center gap-2"><span>🫀</span> Liver</td>
+              <td class="py-3 px-3.5 text-slate-300">Cleans toxins so your body stays safe</td>
+              <td class="py-3 px-3.5 font-semibold text-emerald-300">Data Cleaning & Dropout (Anti-Cheating)</td>
+              <td class="py-3 px-3.5 text-slate-300">A teacher shuffling test questions so you can't just memorize</td>
+              <td class="py-3 px-3.5 text-right"><a href="bioml_interactive_anatomy_explorer.html" class="text-cyan-400 hover:text-cyan-300 font-semibold">Inspect &rarr;</a></td>
+            </tr>
+            <tr class="table-row hover:bg-biolab-850/60 transition">
+              <td class="py-3 px-3.5 font-bold text-white flex items-center gap-2"><span>❤️</span> Heart</td>
+              <td class="py-3 px-3.5 text-slate-300">Pumps fresh blood in steady rhythmic beats</td>
+              <td class="py-3 px-3.5 font-semibold text-rose-300">Training Loop & Optimizer (Epoch Steps)</td>
+              <td class="py-3 px-3.5 text-slate-300">Repetitions at the gym: each set builds muscle memory</td>
+              <td class="py-3 px-3.5 text-right"><a href="bioml_interactive_anatomy_explorer.html" class="text-cyan-400 hover:text-cyan-300 font-semibold">Inspect &rarr;</a></td>
+            </tr>
+            <tr class="table-row hover:bg-biolab-850/60 transition">
+              <td class="py-3 px-3.5 font-bold text-white flex items-center gap-2"><span>🧠</span> Brain</td>
+              <td class="py-3 px-3.5 text-slate-300">Stores memories & fires reflex actions</td>
+              <td class="py-3 px-3.5 font-semibold text-cyan-300">Neural Network Model & Learned Weights</td>
+              <td class="py-3 px-3.5 text-slate-300">Remembering how to balance a bicycle without thinking</td>
+              <td class="py-3 px-3.5 text-right"><a href="bioml_interactive_anatomy_explorer.html" class="text-cyan-400 hover:text-cyan-300 font-semibold">Inspect &rarr;</a></td>
+            </tr>
+            <tr class="table-row hover:bg-biolab-850/60 transition">
+              <td class="py-3 px-3.5 font-bold text-white flex items-center gap-2"><span>🩺</span> Kidneys</td>
+              <td class="py-3 px-3.5 text-slate-300">Catches waste & flushes useless fluid</td>
+              <td class="py-3 px-3.5 font-semibold text-amber-300">Loss Function (Mistake Penalty) & Pruning</td>
+              <td class="py-3 px-3.5 text-slate-300">Teacher's red pen marking homework mistakes to fix</td>
+              <td class="py-3 px-3.5 text-right"><a href="bioml_interactive_anatomy_explorer.html" class="text-cyan-400 hover:text-cyan-300 font-semibold">Inspect &rarr;</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick Footer Links -->
+    <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+      <span>Want to practice?</span>
+      <div class="flex items-center gap-3">
+        <a href="bioml_interactive_anatomy_explorer.html" class="hover:text-cyan-300 transition">&larr; Back to Body Scanner</a>
+        <span>•</span>
+        <a href="quiz.html" class="text-emerald-400 font-bold hover:text-emerald-300 transition">Take the Pop Quiz &rarr;</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-biolab-800/80 py-2.5 text-center text-xs text-slate-500 font-mono">
+    BioML Study Guide • Grade 10 Certified
+  </footer>
+
+  <!-- ==================== SCRIPT ==================== -->
+  <script>
+    function filterTable(query) {
+      const q = query.toLowerCase().trim();
+      const rows = document.querySelectorAll('.table-row');
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        if (!q || text.includes(q)) {
+          r.style.display = '';
+        } else {
+          r.style.display = 'none';
+        }
+      });
+    }
+
+    function copyMarkdownTable() {
+      const md = `## 🧬 Machine Learning Explained Through the Human Body (10th-Grade Guide)
+
+| Organ | What it Does in You (Biology) | What it Does in AI (Machine Learning) | High School Everyday Analogy |
+| :--- | :--- | :--- | :--- |
+| **👁️ Senses (Eyes)** | Turns light rays into nerve signals | **Computer Vision (RGB Pixels to Numbers)** | Zooming into your phone screen to see red, green, blue dots |
+| **🫁 Lungs** | Inhales messy air, pulls out clean $O_2$ | **Feature Scaling & Normalization (0.0 - 1.0)** | Grading tests on a 0% to 100% percentage curve |
+| **🥣 Stomach & Gut** | Breaks sandwiches into micro-nutrients | **Tokenization & Word Embeddings** | Breaking a giant LEGO fortress into individual bricks |
+| **🫀 Liver** | Detoxifies junk so you don't get sick | **Data Cleaning & Dropout (Anti-Cheating)** | Pop quizzes with shuffled questions so you don't memorize |
+| **❤️ Heart** | Pumps blood rhythmically to muscles | **Training Loop & Optimizer (Adam / SGD)** | Repetitions at gym: each practice shot refines muscle memory |
+| **🧠 Brain** | Stores memories & fires reflex actions | **Neural Network Model & Learned Weights** | Remembering how to balance a bike without thinking |
+| **🩺 Kidneys** | Measures waste & flushes useless fluid | **Loss Function (Mistake Penalty) & Pruning** | Teacher's red pen marking homework mistakes to fix |
+`;
+      const dummy = document.createElement("textarea");
+      document.body.appendChild(dummy);
+      dummy.value = md;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      
+      const btn = document.getElementById('copyTableBtnText');
+      btn.innerText = "✅ Copied to Clipboard!";
+      setTimeout(() => btn.innerText = "Copy README Table", 2200);
+    }
+  </script>
+</body>
+</html>
